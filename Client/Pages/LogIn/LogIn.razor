@@ -1,0 +1,52 @@
+﻿@page "/login"
+@inject HttpClient http
+@inject NavigationManager nav
+
+<h3>Login</h3>
+
+<br />
+
+<EditForm Model="@log" OnValidSubmit="@GrantAccess">
+    <div class="form-group">
+        <label>Email address</label>
+        <input type="email" class="form-control" placeholder="Email address" @bind-value="@log.Email">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="form-control" placeholder="Password" @bind-value="@log.Password">
+        <small class="form-text text-muted">
+            <a href="recover" class="text-muted">I forgot my password...</a>
+        </small>
+    </div>
+    @if (invalidCredentials)
+    {
+        <p style="color: red;">Invalid email and password combination</p>
+    }
+    <button type="submit" class="btn btn-primary">Log In</button>
+</EditForm>
+
+<br />
+<p>OR</p>
+
+<a href="account/create" class="btn btn-primary">I don't have an account</a>
+
+
+@code {
+    private LoginAttempt log = new LoginAttempt();
+    public bool invalidCredentials = false;
+
+    // This method will check the email and password combinations to see if access is to be granted
+    private async Task GrantAccess()
+    {
+        var creds = log.Email + "|||" + log.Password;
+        try
+        {
+            var user = await http.GetFromJsonAsync<User>($"api/login/{creds}");
+            nav.NavigateTo("main");
+        }
+        catch
+        {
+            invalidCredentials = true;
+        }
+    }
+}

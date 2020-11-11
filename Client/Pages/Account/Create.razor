@@ -1,0 +1,81 @@
+﻿@page "/account/create"
+@inject HttpClient http
+@inject NavigationManager nav
+
+<h3>Create New Account</h3>
+
+<EditForm Model="@user" OnValidSubmit="@CreateUser">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Email address</label>
+        <input type="email" class="form-control" placeholder="Email address" @bind-value="@user.Email">
+        <ValidationMessage For="@( () => user.Email )" />
+    </div>
+
+    <br />
+
+    @if (EmailExists)
+    {
+        <p>This email address already has an account. Did you <a href="recover">forgot your password?</a></p>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" placeholder="Password" @bind-value="@user.Password">
+            <ValidationMessage For="@( () => user.Password )" />
+        </div>
+        <div class="form-group">
+            <label>Confirm password</label>
+            <input type="password" class="form-control" placeholder="Confirm password" @bind-value="@ConfirmPassword">
+            @if (ConfirmPassword != user.Password)
+            {
+                <small class="form-text text-danger">
+                    The two fields have different values, please check
+                </small>
+            }
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label>Screen name</label>
+            <input type="text" class="form-control" placeholder="Screen name" @bind-value="@user.Name">
+            <small class="form-text text-muted">
+                This name will be shown publicly instead of your email address
+            </small>
+            <ValidationMessage For="@( () => user.Name )" />
+        </div>
+        <div class="form-group">
+            <label>Lucky number</label>
+            <input type="number" class="form-control" placeholder="Lucky number" @bind-value="@user.LuckyNumber">
+            <small class="form-text text-muted">
+                This is a extra step for recovering your account if lost
+            </small>
+            @if (user.LuckyNumber == 0)
+            {
+                <small class="form-text text-warning">
+                    0 (zero) is the default number. Are you sure you want to keep it?
+                </small>
+            }
+        </div>
+
+        <button class="btn btn-primary">Next</button>
+    }
+</EditForm>
+
+@code {
+    private bool EmailExists = false;
+    private string ConfirmPassword;
+
+    public User user = new User();
+
+    public async Task CreateUser()
+    {
+        user.Role = 3;
+
+        await http.PostAsJsonAsync<User>("api/Users", user);
+        nav.NavigateTo("login");
+    }
+}
