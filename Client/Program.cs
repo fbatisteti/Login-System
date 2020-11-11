@@ -19,6 +19,9 @@ namespace Login.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            // This is for the persitent data
+            builder.Services.AddSingleton<Login.Shared.Services.PersistentData>();
+
             await builder.Build().RunAsync();
         }
     }

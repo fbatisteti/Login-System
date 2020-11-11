@@ -30,6 +30,9 @@ namespace Login.Server
             services.AddDbContext<LoginContext>(options =>
                options.UseMySql(Configuration.GetConnectionString("AppDB"))
             );
+
+            // This is for the persistent data
+            services.AddSingleton<Shared.Services.PersistentData>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

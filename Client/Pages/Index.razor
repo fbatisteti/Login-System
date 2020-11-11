@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject PersistentData memo
 
 <h1>Login - Authorization and Authentication</h1>
 
@@ -33,4 +34,11 @@
 
 <hr />
 
-<a href="login" class="btn btn-primary btn-lg btn-block" role="button" aria-pressed="true">Get started</a>
+@if (memo.Logged)
+{
+    <a href="main" class="btn btn-primary btn-lg btn-block" role="button" aria-pressed="true">Get started</a>
+}
+else
+{
+    <a href="login" class="btn btn-primary btn-lg btn-block" role="button" aria-pressed="true">Get started</a>
+}

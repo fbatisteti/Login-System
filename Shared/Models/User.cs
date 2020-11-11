@@ -31,6 +31,7 @@ namespace Login.Shared.Models
         //    1 - Admin
         //    2 - Power User
         //    3 - Normal User
+        //    0 - Not logged
         public int Role { get; set; }
     }
 }

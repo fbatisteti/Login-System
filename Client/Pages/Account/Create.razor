@@ -1,26 +1,34 @@
 ﻿@page "/account/create"
 @inject HttpClient http
 @inject NavigationManager nav
+@inject PersistentData memo
 
 <h3>Create New Account</h3>
 
 <EditForm Model="@user" OnValidSubmit="@CreateUser">
     <DataAnnotationsValidator />
 
-    <div class="form-group">
-        <label>Email address</label>
-        <input type="email" class="form-control" placeholder="Email address" @bind-value="@user.Email">
-        <ValidationMessage For="@( () => user.Email )" />
-    </div>
-
-    <br />
-
     @if (EmailExists)
     {
-        <p>This email address already has an account. Did you <a href="recover">forgot your password?</a></p>
+        <div class="form-group">
+            <label>Email address</label>
+            <input type="email" class="form-control" placeholder="Email address"
+                   @bind-value="@user.Email" @bind-value:event="onchange">
+            <ValidationMessage For="@( () => user.Email )" />
+        </div>
+        <div>
+            <button class="btn btn-primary" @onclick="@CheckEmail"> > </button>
+        </div>
     }
-    else
+    <br />
+
+    @if (EmailExists && EmailExistsError)
     {
+        <p>This email address already has an account. Did you <a href="recover">forget your password?</a></p>
+    }
+    else if (!EmailExists)
+    {
+        <p>Creating account for: <b>@user.Email</b> <a class="text-muted" @onclick="@Reset">[change email address]</a></p>
         <div class="form-group">
             <label>Password</label>
             <input type="password" class="form-control" placeholder="Password" @bind-value="@user.Password">
@@ -66,7 +74,8 @@
 </EditForm>
 
 @code {
-    private bool EmailExists = false;
+    private bool EmailExists = true;
+    private bool EmailExistsError = false;
     private string ConfirmPassword;
 
     public User user = new User();
@@ -77,5 +86,54 @@
 
         await http.PostAsJsonAsync<User>("api/Users", user);
         nav.NavigateTo("login");
+    }
+
+    // Method to check if email exists
+    public async Task CheckEmail()
+    {
+        // Checks if email is valid
+        bool valid;
+        try
+        {
+            // Not the best solution, but this will work for now
+            var mail = new System.Net.Mail.MailAddress(user.Email);
+            valid = true;
+        }
+        catch
+        {
+            valid = false;
+        }
+
+        // If valid, checks to see if it's unique
+        if (valid)
+        {
+            var users = await http.GetFromJsonAsync<List<User>>("api/Users");
+
+            foreach (User registeredUser in users)
+            {
+                if (registeredUser.Email == user.Email)
+                {
+                    // Email already in use
+                    EmailExists = true;
+                    EmailExistsError = true;
+                    memo.Email = user.Email; // saved on persistent data in case "forgot my password" is clicked
+                    return;
+                }
+            }
+            // Email is available
+            EmailExists = false;
+        }
+    }
+
+    // Reset parameters
+    public void Reset()
+    {
+        EmailExists = true;
+        EmailExistsError = false;
+        user.Email = null;
+        user.Password = null;
+        ConfirmPassword = null;
+        user.LuckyNumber = 0;
+        user.Name = null;
     }
 }

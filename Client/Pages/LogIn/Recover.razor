@@ -1,26 +1,73 @@
 ﻿@page "/recover"
+@inject HttpClient http
+@inject NavigationManager nav
+@inject PersistentData memo
 
 <h3>Recover Password</h3>
 
 <br />
 
-<p>Please, complete the fields below. If they match with our data, you will receive a new password soon enough.</p>
-<form>
-    <div class="form-group">
-        <label>Email address</label>
-        <input type="email" class="form-control" placeholder="Email">
-    </div>
-    <div class="form-group">
-        <label>Screen name</label>
-        <input type="text" class="form-control" placeholder="Screen name">
-    </div>
-    <div class="form-group">
-        <label>Lucky number</label>
-        <input type="password" class="form-control" placeholder="Lucky number">
-    </div>
-    <button type="submit" class="btn btn-primary">Remember Password</button>
-</form>
+@if (!recoverySuccess)
+{
+    <p>Please, complete the fields below. If they match with our data, you will receive a new password soon enough.</p>
+    <EditForm Model="@recover" OnValidSubmit="@Recovery">
+        <div class="form-group">
+            <label>Email address</label>
+            <input type="email" class="form-control" placeholder="Email address" @bind-value="@recover.Email">
+        </div>
+        <div class="form-group">
+            <label>Screen name</label>
+            <input type="text" class="form-control" placeholder="Screen name" @bind-value="@recover.Name">
+        </div>
+        <div class="form-group">
+            <label>Lucky number</label>
+            <input type="number" class="form-control" placeholder="Lucky number" @bind-value="@recover.LuckyNumber">
+        </div>
+        @if (!recoverySuccess)
+        {
+            <button type="submit" class="btn btn-primary">Remember Password</button>
+        }
+    </EditForm>
+    @if (recoveryFailed)
+    {
+        <p style="color:red;">Your data does not match to our record. An admin will soon contact you.</p>
+    }
+}
+
+@if (recoverySuccess)
+{
+    <p>Your password has been reseted. Please try logging in again. Don't forget to change your password afterwards.</p>
+    <a href="/login" class="btn btn-primary">Login</a>
+}
 
 @code {
+    public RecoverAttempt recover = new RecoverAttempt();
+    public bool recoveryFailed = false;
+    public bool recoverySuccess = false;
 
+    // Just to fetch the email from persitency in case it is coming from register
+    // IMPORTANT: this will give you warning when building... won't break, though
+    protected override async Task OnInitializedAsync()
+    {
+        if (memo.Email != null) recover.Email = memo.Email;
+    }
+
+    // This method will check the data passed and SHOULD decide what to do with it...
+    // IN THIS CASE, FOR THIS PARTICULAR PROJECT WITH ENDS BEING JUST TURNING IT IN FOR A COLLEGE GRADE,
+    // In case both fields match a DB entry, it will change the password to "NewPassword";
+    // In all other cases, the BAMF will get a notice to manually change it
+    public async Task Recovery()
+    {
+        var creds = recover.Email + "|||" + recover.Name + "|||" + recover.LuckyNumber;
+        try
+        {
+            var user = await http.GetFromJsonAsync<User>($"api/Recover/{creds}");
+            memo.Email = user.Email;
+            recoverySuccess = true;
+        }
+        catch
+        {
+            recoveryFailed = true;
+        }
+    }
 }

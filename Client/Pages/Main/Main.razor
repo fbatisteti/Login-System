@@ -1,6 +1,9 @@
 ﻿@page "/main"
+@inject PersistentData memo
 
 <h3>Main</h3>
+
+<p>@memo.Name / @memo.Role</p>
 
 @code {
 
