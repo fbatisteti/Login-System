@@ -57,7 +57,7 @@
                     </NavLink>
                 </li>
                 <li class="nav-item px-3">
-                    <NavLink class="nav-link" href="login">
+                    <NavLink class="nav-link" href="bigredbutton">
                         <span class="oi oi-warning" aria-hidden="true"></span> The Big Red Button
                     </NavLink>
                 </li>
@@ -85,7 +85,7 @@
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
+    public void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }

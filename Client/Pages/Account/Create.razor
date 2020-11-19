@@ -136,4 +136,10 @@
         user.LuckyNumber = 0;
         user.Name = null;
     }
+
+    // In case of access by logged person, redirect
+    protected override async Task OnInitializedAsync()
+    {
+        if (memo.Logged) nav.NavigateTo("main");
+    }
 }

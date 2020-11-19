@@ -1,0 +1,36 @@
+﻿@page "/bigredbutton"
+@inject NavigationManager nav
+@inject PersistentData memo
+
+<div class="container">
+    <div class="row">
+
+        @if (clicked)
+        {
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=0&amp;start=43&autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        }
+        else
+        {
+            <div class="span5 offset3">
+                <button type="button" class="btn btn-danger"
+                   style="width: 400px;
+                                height: 400px;
+                                padding: 10px 16px;
+                                font-size: 56px;
+                                line-height: 1.33;
+                                border-radius: 270px;"
+                   @onclick="@( () => clicked = true )"/>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    bool clicked = false;
+
+    // In case of access by anyone but the BAMF, redirect
+    protected override async Task OnInitializedAsync()
+    {
+        if (memo.Role != 1) nav.NavigateTo("main");
+    }
+}

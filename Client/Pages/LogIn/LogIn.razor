@@ -41,6 +41,9 @@
     protected override async Task OnInitializedAsync()
     {
         if (memo.Email != null) log.Email = memo.Email;
+
+        // In case of access by logged person, redirect
+        if (memo.Logged) nav.NavigateTo("main");
     }
 
     // This method will check the email and password combinations to see if access is to be granted
@@ -53,6 +56,7 @@
             memo.Name = user.Name;
             memo.Role = user.Role;
             memo.Logged = true;
+            memo.Email = user.Email;
             nav.NavigateTo("main");
         }
         catch

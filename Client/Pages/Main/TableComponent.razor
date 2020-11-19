@@ -1,0 +1,91 @@
+﻿@inject HttpClient http
+@inject NavigationManager nav
+
+<table class="table table-hover table-borderless">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">User</th>
+            <th scope="col">Role</th>
+            <th scope="col">Promote / Demote</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User user in Users)
+        {
+        <tr>
+            <th scope="row">@user.UserId</th>
+            <td>@user.Name (@user.Email)</td>
+            <td>
+                @switch (user.Role)
+                {
+                    case 1:
+                        <text>BAMF (or Admin)</text>
+                        break;
+
+                    case 2:
+                        <text>Power User</text>
+                        break;
+
+                    case 3:
+                        <text>Common User</text>
+                        break;
+                }
+            </td>
+                @switch(Role)
+                {
+                    // is ADMIN
+                    case 1:
+                        <td>
+                            <span class="oi oi-thumb-up text-success" aria-hidden="true" @onclick="@( () => Promote(user.UserId, user) )"></span>
+                            <span> | </span>
+                            <span class="oi oi-thumb-down text-danger" aria-hidden="true" @onclick="@( () => Demote(user.UserId, user) )"></span>
+                        </td>
+                        break;
+
+                    // is POWER USER
+                    case 2:
+                        @if(user.Role == 3)
+                        {
+                            <td>
+                                <span class="oi oi-thumb-up text-success" aria-hidden="true" @onclick="@( () => Promote(user.UserId, user) )"></span>
+                                <span> | </span>
+                                <span class="oi oi-thumb-down text-danger" aria-hidden="true" @onclick="@( () => Demote(user.UserId, user) )"></span>
+                            </td>
+                        }
+                        break;
+
+                    // shouldn't be here, really
+                    default:
+                        break;
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public int Role { get; set; }
+    [Parameter] public List<User> Users { get; set; }
+    User user = new User();
+
+    async Task Promote(int UserId, User user)
+    {
+        if (user.Role > 2)
+            user.Role = user.Role - 1;
+
+        await http.PutAsJsonAsync<User>($"api/Users/{UserId}", user);
+
+        nav.NavigateTo("main");
+    }
+
+    async Task Demote(int UserId, User user)
+    {
+        if (user.Role == 2)
+            user.Role = user.Role + 1;
+
+        await http.PutAsJsonAsync<User>($"api/Users/{UserId}", user);
+
+        nav.NavigateTo("main");
+    }
+}

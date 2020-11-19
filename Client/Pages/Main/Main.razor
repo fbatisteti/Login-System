@@ -1,10 +1,36 @@
 ﻿@page "/main"
 @inject PersistentData memo
+@inject NavigationManager nav
+@inject HttpClient http
+<!--
+    This page holds all the information for each user, for demonstration purposes
+-->
 
-<h3>Main</h3>
+@switch (memo.Role)
+{
+    // For Common Users, say "hi"
+    case 3:
+        <p>Hello, @memo.Name, good to see your here.</p>
+        break;
 
-<p>@memo.Name / @memo.Role</p>
+    // For the BAMF Admin, listing all users and allowing promotion and demotion
+    // For Power Users, listing all users and allowing promotion and demotion for Normal Users
+    default:
+        <TableComponent Role="@memo.Role" Users="@users" />
+        break;
+}
+
 
 @code {
+    List<User> users = new List<User>();
+    User user = new User();
 
+    protected override async Task OnInitializedAsync()
+    {
+        // Redirect in case of user not logged
+        if (!memo.Logged) nav.NavigateTo("login");
+
+        // Get users for list
+        users = await http.GetFromJsonAsync<List<User>>("api/Users");
+    }
 }

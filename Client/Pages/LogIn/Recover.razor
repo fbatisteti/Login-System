@@ -50,6 +50,9 @@
     protected override async Task OnInitializedAsync()
     {
         if (memo.Email != null) recover.Email = memo.Email;
+        
+        // In case of access by logged person, redirect
+        if (memo.Logged) nav.NavigateTo("main");
     }
 
     // This method will check the data passed and SHOULD decide what to do with it...

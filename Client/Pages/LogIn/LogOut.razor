@@ -1,0 +1,15 @@
+﻿@page "/logout"
+@inject NavigationManager nav
+@inject PersistentData memo
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        memo.Name = null;
+        memo.Role = 0;
+        memo.Logged = false;
+        memo.Email = null;
+
+        nav.NavigateTo("/");
+    }
+}
